@@ -129,7 +129,7 @@ static void ledControlTimerOCInit (void)
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
 
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
-	// dau ra se dao trang thai khi dem den auto-reload
+	// Dau ra se dao trang thai khi dem den auto-reload
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
 	//Trang thai dau ra se ve muc low neu dem den gia tri Compare
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
