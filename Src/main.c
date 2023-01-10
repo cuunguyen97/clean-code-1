@@ -14,7 +14,7 @@
  *
  * File name: main.c
  *
- * Description: Control bright led theo gia tri anh sang ma sensor do duoc.
+ * Description: Each 100ms, read light's value and adjust brightness of Led.
  *
  * Author: CuuNV
  *
@@ -75,10 +75,13 @@ int main(void)
 		ablProcess();
 	}
 }
-/*
- *
- *
+/**
+ * @func   appInitCommon
+ * @brief  Initializes functions
+ * @param  None
+ * @retval None
  */
+
 void appInitCommon(void)
 {
 	SystemCoreClockUpdate();
@@ -88,12 +91,14 @@ void appInitCommon(void)
 	// (mea_e, est_e, q)
 	KalmanFilterInit(2,2,0.001);
 }
-/*
- * Ham khoi tao chan PA1
- * Chuc nang su dung TIM2_CH2
- * Tan so cap PWM la 10kHz
- *
+/**
+ * @func   ledControlTimerOCInit
+ * @brief  Initializes led, mode: timer output capture
+ * Pin: PA1,Timer 2,channel 2, Frequence: 10kHz
+ * @param  None
+ * @retval None
  */
+
 static void ledControlTimerOCInit (void)
 {
 	GPIO_InitTypeDef 		GPIO_InitStructure;
@@ -138,13 +143,15 @@ static void ledControlTimerOCInit (void)
 
 	TIM_CtrlPWMOutputs(TIM2, ENABLE);
 }
-/*
- * Ham khoi tao chan PC5
- * Chuc nang ADC su dung ADC1_IN15
- * Mode doc du lieu lien tuc va don kenh
- * Do phan giai 12bit voi thoi gian lay mau la 15cycle
- * Thoi gian giua 2 lan lay mau la 5cycle
+/**
+ * @func   lightSensorAdcInit
+ * @brief  Initializes light sensor, mode: ADC
+ * Pin: PC5,ADC1,IN15, Two sampling delay:5 cycles,Sample time:15 cycles
+ * Resolution :12b
+ * @param  None
+ * @retval None
  */
+
 static void lightSensorAdcInit(void)
 {
 	//ADC1_IN15-PC5
@@ -196,9 +203,11 @@ static void lightSensorAdcInit(void)
 	ADC_Cmd(ADC1, ENABLE);
 
 }
-/*
- * Ham dieu khien do rong xung
- * Gia tri duty = 0~100;
+/**
+ * @func   ledControlTimerOcSetPwm
+ * @brief  Adjust brightness's led use to PWM, mode: PWM
+ * @param  byDuty (0-100)
+ * @retval None
  */
 static void ledControlTimerOcSetPwm(uint8_t byDuty)
 {
@@ -208,9 +217,12 @@ static void ledControlTimerOcSetPwm(uint8_t byDuty)
 
 	TIM_SetCompare2(TIM2, wPulseLength);
 }
-/*
- * Ham doc gia tri sensor tu bo ADC
- * Gia tri tra ve 0~4095
+
+/**
+ * @func   lightSensorAdcPollingRead
+ * @brief  Read light's value use to ADC
+ * @param  None
+ * @retval Light's value(0-4095)
  */
 static uint16_t lightSensorAdcPollingRead(void)
 {
@@ -219,19 +231,23 @@ static uint16_t lightSensorAdcPollingRead(void)
 
 	return ADC_GetConversionValue(ADC1);
 }
-/*
- * Ham loc nhieu su dung bo loc kalman
- * Ham loc gia tri anh sang do duoc tu ham doc ADC
- * Gia tri tra ve 0~4095
+/**
+ * @func   lightValueOfFilter
+ * @brief  Light's value -->ADC--> Kalman Filter --> Light's value
+ * @param  None
+ * @retval Light's value (0-4095)
  */
+
 static uint16_t lightValueOfFilter(void)
 {
 	uint16_t wLight = lightSensorAdcPollingRead();
 	return KalmanFilter_updateEstimate(wLight);
 }
-/*
- * Ham dieu khien muc sang LED
- * Dau vao la gia tri anh sang ma bo ADC doc duoc
+/**
+ * @func   ablStepBrightness
+ * @brief  Control brightness's Led
+ * @param  wLightValue :0-4095
+ * @retval None
  */
 static void ablStepBrightness(uint16_t wLightValue)
 {
@@ -240,13 +256,13 @@ static void ablStepBrightness(uint16_t wLightValue)
 	byDuty = (uint8_t)((wLightValue*100)/4095);
 	ledControlTimerOcSetPwm(byDuty);
 }
-/*
- * Ham tao chu ky quet sensor
- * Thoi gian moi lan quet la 100ms
- * Sau khi quet duoc do sang tu bo loc kalman thi dieu khien muc
- * sang cua led
- * Anh sang cang lon thi muc sang cua led cang cao
+/**
+ * @func   ablProcess
+ * @brief  Each 100ms, read light's value and adjust brightness of Led
+ * @param  None
+ * @retval None
  */
+
 static void ablProcess(void)
 {
 	uint32_t dwTimeCurrent;
